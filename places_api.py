@@ -3,7 +3,7 @@
 import livepopulartimes
 import json
 
-GOOGLE_MAPS_API_KEY = "AIzaSyCTj2k0Hf8b5Iav6W9cVbd4qE17a5l0SiE"
+GOOGLE_MAPS_API_KEY = "INSERT YOUR API KEY HERE"
 
 
 def search(i):
