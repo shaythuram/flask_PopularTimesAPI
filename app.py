@@ -1,45 +1,83 @@
 # -*- coding: utf-8 -*-
 
-from flask import Flask
+from flask import  Flask
 from flask import jsonify
 from flask import request
-from flask_cors import CORS
+from flask_cors import CORS,cross_origin
+from flask import  make_response
 import places_api
+
 
 app = Flask(__name__)
 CORS(app)
+cors = CORS(app, resources={
+    r"/*": {
+       "origins": "*"
+    }
+})
+
+
+
+
 
 @app.route('/', methods=['GET' , 'POST'])
 
 def test():
     return "shay"
 
+@app.route('/weekly_avg', methods=['GET' , 'POST'])
+@cross_origin(origin='localhost',headers=['Content-Type','Authorization'])
+### Average Weekly PT for each Store
+def weekly_avg():
+    if request.method == 'OPTIONS': 
+        return build_preflight_response()
+    elif request.method == 'POST':
+        data = request.get_json()
 
-@app.route('/test', methods=['GET' , 'POST'])
-
-def search():
-    data = request.get_json()
-    print(data)
-    x = places_api.weekly_avg_for_each_ID(data)
-    x = jsonify(x)  
-    return x 
-
-
-
-@app.route('/daily_avg_byID/<string:ID>/<int:day>/', methods=['GET' , 'POST'])
-
-def daily_avg_byID(ID,day):#send Place_ID and index of day Monday is represented by 0
-    x = places_api.daily_avg_byID(ID,day)
-    x = jsonify(x)
-    return x
-
-@app.route('/weekly_avg_byID/<string:ID>/', methods=['GET' , 'POST'])
-def weekly_avg_byID(ID):
-    x = places_api.weekly_avg_byID(ID)
-    x = jsonify(x)  
-    return x
+        x = places_api.weekly_avg_byID(data)
+        x = jsonify(x)  
+        # x.headers.add('Access-Control-Allow-Origin', '*')
+        print(x)
+        return x
 
 
 
+@app.route('/daily_avg/<int:day>', methods=['GET' , 'POST','OPTIONS'])
+@cross_origin(origin='localhost',headers=['Content-Type','Authorization'])
+def daily_avg(day):
+    if request.method == 'OPTIONS': 
+        return build_preflight_response()
+    elif request.method == 'POST':
+        data = request.get_json()
+        print(data)
+        x = places_api.daily_avg_byID(data,day)
+        x = jsonify(x)  
+
+        print(x)
+        return x
+
+@app.route('/hourly_data/<int:day>/<int:hour>', methods=['GET' , 'POST','OPTIONS'])
+@cross_origin(origin='localhost',headers=['Content-Type','Authorization'])
+def hourly_data(day,hour):
+    if request.method == 'OPTIONS': 
+        return build_preflight_response()
+    elif request.method == 'POST':
+        data = request.get_json()
+        print(data)
+        x = places_api.hourly_data(data,day,hour)
+        x = jsonify(x)  
+        # x.headers.add('Access-Control-Allow-Origin', '*')
+        return x
+
+
+def build_preflight_response():
+    response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+def build_actual_response(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=105)
+    app.run(host='0.0.0.0')
